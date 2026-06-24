@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sheltorani — Private Perfumery</title>
+  <meta name="description" content="Fine fragrances delivered on campus. Sheltorani Private Perfumery." />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Favicon placeholder - replace with your logo -->
+  <link rel="icon" type="image/png" href="logo.png" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="logo.png" alt="Sheltorani" onerror="this.style.display='none'" />
+      <div>
+        <div class="nav-logo-text">Sheltorani</div>
+        <div class="nav-logo-sub">Private Perfumery</div>
+      </div>
+    </a>
+    <a href="track.html" class="nav-track-btn">Track Order</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <img src="logo.png" alt="Sheltorani" class="hero-logo" onerror="this.style.display='none'" />
+    <h1 class="hero-title">Sheltorani</h1>
+    <div class="hero-subtitle">Private Perfumery · Fine Fragrances Since MMXXI</div>
+    <p class="hero-tagline">Wear what they remember you by.</p>
+    <div class="hero-cta">
+      <a href="#catalog" class="btn-gold">Explore Fragrances</a>
+    </div>
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works">
+    <div class="section-header">
+      <div class="section-eyebrow">The Experience</div>
+      <h2>How It Works</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="steps-grid">
+      <div>
+        <span class="step-icon">🎀</span>
+        <div class="step-title">Smell the Ribbon</div>
+        <p class="step-desc">Each scented ribbon lets you experience the fragrance before you buy.</p>
+      </div>
+      <div>
+        <span class="step-icon">📲</span>
+        <div class="step-title">Scan & Order</div>
+        <p class="step-desc">Scan the QR code on your ribbon. Pick your size, enter your details.</p>
+      </div>
+      <div>
+        <span class="step-icon">🚚</span>
+        <div class="step-title">Campus Delivery</div>
+        <p class="step-desc">We deliver to your hostel. Pay cash on delivery — zero risk.</p>
+      </div>
+      <div>
+        <span class="step-icon">📍</span>
+        <div class="step-title">Track Live</div>
+        <p class="step-desc">Follow your order from bottling to your door in real time.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATALOG -->
+  <section id="catalog">
+    <div class="section-header">
+      <div class="section-eyebrow">The Collection</div>
+      <h2>Our Fragrances</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="catalog">
+      <div class="perfume-grid" id="perfumeGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Sheltorani</div>
+    <div class="footer-sub">Private Perfumery</div>
+    <nav class="footer-links">
+      <a href="index.html">Collection</a>
+      <a href="track.html">Track Order</a>
+      <a href="https://wa.me/254745773645" target="_blank">WhatsApp Us</a>
+    </nav>
+    <div class="footer-copy">© 2024 Sheltorani · University of Nairobi Campus</div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script>
+    // Build perfume grid
+    const grid = document.getElementById('perfumeGrid');
+    const { perfumes, sizes, currency } = SHELTORANI_CONFIG;
+    const startPrice = sizes[0].price;
+
+    perfumes.forEach(p => {
+      const card = document.createElement('a');
+      card.href = `perfume.html?id=${p.id}`;
+      card.className = 'perfume-card';
+      card.innerHTML = `
+        <div class="perfume-card-accent" style="background: linear-gradient(90deg, ${p.color}66, ${p.color})"></div>
+        <div class="perfume-card-body">
+          <div class="perfume-card-brand">${p.brand}</div>
+          <div class="perfume-card-name">${p.name}</div>
+          <div class="perfume-card-mood">${p.mood}</div>
+          <p class="perfume-card-desc">${p.description}</p>
+        </div>
+        <div class="perfume-card-footer">
+          <span class="perfume-card-price">From ${currency} ${startPrice}</span>
+          <span class="perfume-card-arrow">Order →</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>

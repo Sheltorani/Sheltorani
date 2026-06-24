@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmed — Sheltorani</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="logo.png" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="logo.png" alt="Sheltorani" onerror="this.style.display='none'" />
+      <div>
+        <div class="nav-logo-text">Sheltorani</div>
+        <div class="nav-logo-sub">Private Perfumery</div>
+      </div>
+    </a>
+    <a href="track.html" class="nav-track-btn">Track Order</a>
+  </nav>
+
+  <div class="confirm-page" style="padding-top:80px">
+    <div class="confirm-icon">✦</div>
+    <h1 class="confirm-title">Order Received</h1>
+    <p style="font-family:var(--font-serif);font-size:1.1rem;color:var(--text-muted);font-style:italic">Your fragrance is being prepared</p>
+
+    <div class="confirm-code" id="confirmCode">SHT-????</div>
+
+    <p class="confirm-desc" id="confirmDesc">
+      Save this order code. Use it to track your delivery in real time —
+      from bottling to your door.
+    </p>
+
+    <div id="orderSummary" style="
+      background:var(--marble-2);
+      border:1px solid var(--border-soft);
+      border-radius:var(--radius-lg);
+      padding:1.25rem 1.5rem;
+      margin-bottom:2rem;
+      text-align:left;
+      max-width:360px;
+      width:100%;
+    "></div>
+
+    <div class="confirm-actions">
+      <a id="trackBtn" href="track.html" class="btn-gold">Track My Order</a>
+      <a href="index.html" class="btn-outline">Back to Collection</a>
+    </div>
+
+    <p style="margin-top:2rem;font-size:0.75rem;color:var(--text-muted);max-width:300px;line-height:1.6">
+      We'll deliver to your campus location and collect payment on arrival.
+      Questions? <a href="https://wa.me/254745773645" style="color:var(--gold);text-decoration:none">WhatsApp us →</a>
+    </p>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    const params  = new URLSearchParams(window.location.search);
+    const orderId = params.get('id');
+
+    if (!orderId) { window.location.href = 'index.html'; }
+
+    document.getElementById('confirmCode').textContent = orderId;
+    document.getElementById('trackBtn').href = `track.html?id=${orderId}`;
+
+    // Load order details from localStorage
+    const stored = localStorage.getItem(`order_${orderId}`);
+    if (stored) {
+      const order = JSON.parse(stored);
+      const summary = document.getElementById('orderSummary');
+      summary.innerHTML = `
+        <div style="display:grid;gap:0.75rem">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted)">Perfume</span>
+            <span style="font-family:var(--font-serif);color:var(--cream)">${order.perfume}</span>
+          </div>
+          <div style="height:1px;background:var(--border-soft)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted)">Size</span>
+            <span style="font-family:var(--font-serif);color:var(--cream)">${order.size}ml</span>
+          </div>
+          <div style="height:1px;background:var(--border-soft)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted)">Total</span>
+            <span style="font-family:var(--font-serif);font-size:1.2rem;color:var(--gold)">KSh ${order.price}</span>
+          </div>
+          <div style="height:1px;background:var(--border-soft)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted)">Payment</span>
+            <span style="font-family:var(--font-serif);color:var(--cream)">Cash on Delivery</span>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

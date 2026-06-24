@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sheltorani</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="logo.png" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="logo.png" alt="Sheltorani" onerror="this.style.display='none'" />
+      <div>
+        <div class="nav-logo-text">Sheltorani</div>
+        <div class="nav-logo-sub">Private Perfumery</div>
+      </div>
+    </a>
+    <a href="track.html" class="nav-track-btn">Track Order</a>
+  </nav>
+
+  <div class="perfume-page">
+
+    <!-- PERFUME HERO -->
+    <div class="perfume-hero" id="perfumeHero">
+      <a href="index.html" class="back-btn">← Back to Collection</a>
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- ORDER SECTION -->
+    <div class="order-section">
+      <div class="order-inner">
+        <h2 class="order-title">Place Your Order</h2>
+        <p class="order-subtitle">Select your size · Pay cash on delivery</p>
+
+        <!-- Size selector -->
+        <div class="size-grid" id="sizeGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Price display -->
+        <div class="price-display">
+          <div>
+            <div class="price-label">Total</div>
+            <div class="price-amount" id="priceAmount">KSh 200</div>
+            <div class="price-note">Cash on delivery</div>
+          </div>
+          <div style="text-align:right">
+            <div class="price-label">Size</div>
+            <div style="font-family:var(--font-serif);font-size:1.4rem;color:var(--gold)" id="sizeDisplay">6ml</div>
+          </div>
+        </div>
+
+        <!-- Order form -->
+        <div class="form-group">
+          <label class="form-label" for="customerName">Your Full Name</label>
+          <input class="form-input" type="text" id="customerName" placeholder="e.g. John Kamau" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="customerPhone">Phone Number</label>
+          <input class="form-input" type="tel" id="customerPhone" placeholder="e.g. 0712 345 678" autocomplete="tel" />
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="placeOrder()">
+          Place Order — Cash on Delivery
+        </button>
+
+        <div class="delivery-badge">
+          <div class="delivery-dot"></div>
+          <span>University of Nairobi campus delivery · Pay when you receive</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="data.js"></script>
+  <script>
+    // ── Get perfume from URL ────────────────
+    const params  = new URLSearchParams(window.location.search);
+    const id      = params.get('id');
+    const { perfumes, sizes, currency, whatsapp } = SHELTORANI_CONFIG;
+    const perfume = perfumes.find(p => p.id === id);
+
+    // If perfume not found, redirect home
+    if (!perfume) { window.location.href = 'index.html'; }
+
+    // Set page title
+    document.title = `${perfume.name} — Sheltorani`;
+
+    // ── Render perfume details ─────────────
+    const hero = document.getElementById('perfumeHero');
+    hero.innerHTML += `
+      <div class="perfume-eyebrow">${perfume.brand}</div>
+      <h1 class="perfume-title">${perfume.name}</h1>
+      <span class="perfume-mood-tag">${perfume.gender} · ${perfume.mood}</span>
+      <p class="perfume-description">${perfume.description}</p>
+      <div class="notes-grid">
+        <div class="note-item">
+          <div class="note-label">Top Notes</div>
+          <div class="note-value">${perfume.notes.top}</div>
+        </div>
+        <div class="note-item">
+          <div class="note-label">Heart Notes</div>
+          <div class="note-value">${perfume.notes.heart}</div>
+        </div>
+        <div class="note-item">
+          <div class="note-label">Base Notes</div>
+          <div class="note-value">${perfume.notes.base}</div>
+        </div>
+      </div>
+    `;
+
+    // ── Build size selector ────────────────
+    let selectedSize = sizes[0];
+    const sizeGrid = document.getElementById('sizeGrid');
+
+    sizes.forEach((s, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'size-btn' + (i === 0 ? ' active' : '');
+      btn.innerHTML = `<span class="size-ml">${s.ml}ml</span><span class="size-price">${currency} ${s.price}</span>`;
+      btn.onclick = () => selectSize(s, btn);
+      sizeGrid.appendChild(btn);
+    });
+
+    function selectSize(size, btn) {
+      selectedSize = size;
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('priceAmount').textContent = `${currency} ${size.price}`;
+      document.getElementById('sizeDisplay').textContent = `${size.ml}ml`;
+    }
+
+    // ── Show toast ──────────────────────────
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => t.className = 'toast', 3500);
+    }
+
+    // ── Generate order ID ───────────────────
+    function generateOrderId() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let id = 'SHT-';
+      for (let i = 0; i < 4; i++) id += chars[Math.floor(Math.random() * chars.length)];
+      return id;
+    }
+
+    // ── Place order ─────────────────────────
+    function placeOrder() {
+      const name  = document.getElementById('customerName').value.trim();
+      const phone = document.getElementById('customerPhone').value.trim();
+
+      if (!name)  { showToast('Please enter your name', true); return; }
+      if (!phone) { showToast('Please enter your phone number', true); return; }
+      if (phone.replace(/\s/g, '').length < 9) {
+        showToast('Please enter a valid phone number', true); return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Placing order...';
+
+      const orderId  = generateOrderId();
+      const orderKey = `order_${orderId}`;
+
+      // Save order to localStorage so tracking page can find it
+      const order = {
+        id:        orderId,
+        perfume:   perfume.name,
+        brand:     perfume.brand,
+        size:      selectedSize.ml,
+        price:     selectedSize.price,
+        name:      name,
+        phone:     phone,
+        status:    'bottling',
+        placedAt:  new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(orderKey, JSON.stringify(order));
+
+      // Send WhatsApp notification to you
+      const msg = encodeURIComponent(
+        `🌟 NEW SHELTORANI ORDER\n\n` +
+        `Order ID: ${orderId}\n` +
+        `Perfume: ${perfume.name} (${perfume.brand})\n` +
+        `Size: ${selectedSize.ml}ml\n` +
+        `Amount: KSh ${selectedSize.price}\n\n` +
+        `Customer: ${name}\n` +
+        `Phone: ${phone}\n\n` +
+        `Payment: Cash on Delivery\n` +
+        `Track: Update via track.html`
+      );
+
+      // Small delay then redirect to confirmation
+      setTimeout(() => {
+        // Open WhatsApp for you (owner) — opens in background on mobile
+        window.open(`https://wa.me/${whatsapp}?text=${msg}`, '_blank');
+        // Redirect to confirmation
+        window.location.href = `confirm.html?id=${orderId}`;
+      }, 800);
+    }
+  </script>
+</body>
+</html>
