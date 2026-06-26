@@ -23,20 +23,23 @@
     <div class="section-eyebrow">Live Tracking</div>
     <h1 style="font-size:clamp(1.8rem,6vw,2.8rem);color:var(--gold);font-family:var(--font-display);letter-spacing:0.06em">Track Your Order</h1>
     <div class="divider divider-left"></div>
-    <p style="font-family:var(--font-serif);color:var(--text-muted)">Enter your order code to see live status.</p>
+    <p style="font-family:var(--font-serif);color:var(--text-muted)">Your orders load automatically. Or enter a code to track a specific order.</p>
 
     <div class="tracking-input-group">
       <input class="form-input" type="text" id="trackInput"
         placeholder="e.g. SHT-4K2M"
         style="text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-display)"
         oninput="this.value=this.value.toUpperCase()"
-        onkeydown="if(event.key==='Enter')trackOrder()" />
-      <button class="btn-gold" onclick="trackOrder()">Track</button>
+        onkeydown="if(event.key==='Enter')trackSingle()" />
+      <button class="btn-gold" onclick="trackSingle()">Track</button>
     </div>
 
-    <p id="clearOrderLink" style="text-align:center;margin-top:0.5rem;font-size:0.8rem;display:none">
-      Not your order? <a href="#" onclick="clearSavedOrder();document.getElementById('clearOrderLink').style.display='none';return false;" style="color:var(--gold);text-decoration:none">Track a different order →</a>
-    </p>
+    <div id="myOrdersSection" style="display:none;margin-top:1.5rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+        <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold)">My Orders</div>
+        <a href="#" onclick="clearAllOrders();return false;" style="font-size:0.75rem;color:var(--text-muted);text-decoration:none">Clear history →</a>
+      </div>
+    </div>
 
     <div id="trackResult"></div>
   </div>
@@ -45,7 +48,6 @@
 
   <script src="data.js"></script>
   <script>
-    // ── REPLACE THIS WITH YOUR APPS SCRIPT URL ──
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzV3auRoUQJshElYq-uOJdxCVmU6SCUWT5KtRzgYCBJW2NZABGhCL3JyKwPD4mkxPs/exec';
 
     const STATUSES = [
@@ -66,19 +68,66 @@
       return new Date(iso).toLocaleString('en-KE', { hour:'2-digit', minute:'2-digit', month:'short', day:'numeric' });
     }
 
-    async function trackOrder() {
+    function buildOrderCard(order, refreshFn) {
+      const currentIndex = STATUSES.findIndex(s => s.key === order.status);
+      let timelineHTML = '';
+      STATUSES.forEach((s, i) => {
+        let state = i < currentIndex ? 'done' : i === currentIndex ? 'active' : 'pending';
+        timelineHTML += `
+          <li class="timeline-item ${state}">
+            <div class="timeline-dot">${state==='done'?'✓':s.icon}</div>
+            <div class="timeline-content">
+              <div class="timeline-title">${s.label}</div>
+              ${state==='active'?`<div class="timeline-time" style="color:var(--gold-dim);font-style:italic">${s.desc}</div>`:''}
+              <div class="timeline-time">${state==='done'?'Completed':state==='active'?'<span style="color:var(--gold)">In progress now</span>':'Pending'}</div>
+            </div>
+          </li>`;
+      });
+      const statusColors = { bottling:'#c9a84c', packaging:'#c9a84c', delivery:'#4caf7c', delivered:'#4caf7c' };
+      const statusColor = statusColors[order.status] || 'var(--gold)';
+      const currentStatus = STATUSES[currentIndex];
+      return `
+        <div class="order-card fade-in" style="margin-bottom:1.5rem">
+          <div class="order-card-header">
+            <div class="order-id">${order.orderID}</div>
+            <div class="order-meta">${order.perfume} · ${order.size}ml · KSh ${order.price}</div>
+            <div style="margin-top:0.75rem">
+              <span style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:${statusColor};border:1px solid ${statusColor}44;background:${statusColor}11;padding:0.3rem 0.75rem;border-radius:20px">
+                ${currentStatus?.icon} ${currentStatus?.label || order.status}
+              </span>
+            </div>
+          </div>
+          <div class="order-card-body">
+            <ul class="timeline">${timelineHTML}</ul>
+            <div style="margin-top:1.5rem;padding:1rem;background:var(--marble-3);border:1px solid var(--border-soft);border-radius:var(--radius);font-size:0.8rem;color:var(--text-muted)">
+              <strong style="color:var(--gold)">Customer:</strong> ${order.name} · ${order.phone}<br/>
+              <strong style="color:var(--gold)">Placed:</strong> ${formatTime(order.placedAt)}
+            </div>
+            ${order.status==='delivered'?`
+              <div style="margin-top:1.5rem;text-align:center;padding:1rem">
+                <div style="font-size:2rem;margin-bottom:0.5rem">🌟</div>
+                <div style="font-family:var(--font-serif);font-style:italic;color:var(--cream);font-size:1rem">Enjoy your fragrance. Wear what they remember you by.</div>
+              </div>`:`
+              <button onclick="${refreshFn}" style="width:100%;margin-top:1rem;background:transparent;border:1px solid var(--border-soft);border-radius:var(--radius);padding:0.75rem;font-family:var(--font-body);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);cursor:pointer">
+                🔄 Refresh Status
+              </button>`}
+            <p style="margin-top:1rem;font-size:0.78rem;color:var(--text-muted);text-align:center">
+              Questions? <a href="https://wa.me/${SHELTORANI_CONFIG.whatsapp}" style="color:var(--gold);text-decoration:none">WhatsApp us →</a>
+            </p>
+          </div>
+        </div>`;
+    }
+
+    // Track a single order typed in the input box
+    async function trackSingle() {
       const raw   = document.getElementById('trackInput').value.trim().toUpperCase();
       const input = raw.startsWith('SHT-') ? raw : `SHT-${raw}`;
       const result = document.getElementById('trackResult');
-
       if (input.length < 8) { showToast('Enter a valid order code like SHT-4K2M', true); return; }
-
       result.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:var(--font-serif);font-style:italic">Fetching your order...</div>`;
-
       try {
         const res  = await fetch(`${SCRIPT_URL}?orderID=${input}`);
         const data = await res.json();
-
         if (!data.success) {
           result.innerHTML = `
             <div class="not-found fade-in">
@@ -88,84 +137,50 @@
             </div>`;
           return;
         }
-
-        const order = data.order;
-        const currentIndex = STATUSES.findIndex(s => s.key === order.status);
-
-        let timelineHTML = '';
-        STATUSES.forEach((s, i) => {
-          let state = i < currentIndex ? 'done' : i === currentIndex ? 'active' : 'pending';
-          timelineHTML += `
-            <li class="timeline-item ${state}">
-              <div class="timeline-dot">${state==='done'?'✓':s.icon}</div>
-              <div class="timeline-content">
-                <div class="timeline-title">${s.label}</div>
-                ${state==='active'?`<div class="timeline-time" style="color:var(--gold-dim);font-style:italic">${s.desc}</div>`:''}
-                <div class="timeline-time">${state==='done'?'Completed':state==='active'?'<span style="color:var(--gold)">In progress now</span>':'Pending'}</div>
-              </div>
-            </li>`;
-        });
-
-        const statusColors = { bottling:'#c9a84c', packaging:'#c9a84c', delivery:'#4caf7c', delivered:'#4caf7c' };
-        const statusColor  = statusColors[order.status] || 'var(--gold)';
-        const currentStatus = STATUSES[currentIndex];
-
-        result.innerHTML = `
-          <div class="order-card fade-in">
-            <div class="order-card-header">
-              <div class="order-id">${order.orderID}</div>
-              <div class="order-meta">${order.perfume} · ${order.size}ml · KSh ${order.price}</div>
-              <div style="margin-top:0.75rem">
-                <span style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:${statusColor};border:1px solid ${statusColor}44;background:${statusColor}11;padding:0.3rem 0.75rem;border-radius:20px">
-                  ${currentStatus?.icon} ${currentStatus?.label || order.status}
-                </span>
-              </div>
-            </div>
-            <div class="order-card-body">
-              <ul class="timeline">${timelineHTML}</ul>
-              <div style="margin-top:1.5rem;padding:1rem;background:var(--marble-3);border:1px solid var(--border-soft);border-radius:var(--radius);font-size:0.8rem;color:var(--text-muted)">
-                <strong style="color:var(--gold)">Customer:</strong> ${order.name} · ${order.phone}<br/>
-                <strong style="color:var(--gold)">Placed:</strong> ${formatTime(order.placedAt)}
-              </div>
-              ${order.status==='delivered'?`
-                <div style="margin-top:1.5rem;text-align:center;padding:1rem">
-                  <div style="font-size:2rem;margin-bottom:0.5rem">🌟</div>
-                  <div style="font-family:var(--font-serif);font-style:italic;color:var(--cream);font-size:1rem">Enjoy your fragrance. Wear what they remember you by.</div>
-                </div>`:`
-                <button onclick="trackOrder()" style="width:100%;margin-top:1rem;background:transparent;border:1px solid var(--border-soft);border-radius:var(--radius);padding:0.75rem;font-family:var(--font-body);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);cursor:pointer">
-                  🔄 Refresh Status
-                </button>`}
-              <p style="margin-top:1rem;font-size:0.78rem;color:var(--text-muted);text-align:center">
-                Questions? <a href="https://wa.me/${SHELTORANI_CONFIG.whatsapp}" style="color:var(--gold);text-decoration:none">WhatsApp us →</a>
-              </p>
-            </div>
-          </div>`;
-
+        result.innerHTML = buildOrderCard(data.order, 'trackSingle()');
       } catch(e) {
         result.innerHTML = `<div class="not-found fade-in"><span class="not-found-icon">⚠️</span><h3 style="color:var(--text-muted)">Connection error. Please try again.</h3></div>`;
       }
     }
 
-    // Auto-load from URL param (when redirected from confirm page)
+    // Load ALL saved orders for this customer
+    async function loadAllMyOrders(orderCodes) {
+      const result = document.getElementById('trackResult');
+      result.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:var(--font-serif);font-style:italic">Loading your orders...</div>`;
+      const cards = [];
+      for (const code of orderCodes) {
+        try {
+          const res  = await fetch(`${SCRIPT_URL}?orderID=${code}`);
+          const data = await res.json();
+          if (data.success) cards.push(buildOrderCard(data.order, "loadAllMyOrders(JSON.parse(localStorage.getItem('sheltorani_orders')||'[]'))"));
+        } catch(e) {}
+      }
+      if (cards.length === 0) {
+        result.innerHTML = `<div class="not-found fade-in"><span class="not-found-icon">✦</span><h3 style="color:var(--text-muted)">No orders found. Enter your order code above.</h3></div>`;
+      } else {
+        result.innerHTML = cards.join('');
+      }
+    }
+
+    function clearAllOrders() {
+      localStorage.removeItem('sheltorani_orders');
+      document.getElementById('myOrdersSection').style.display = 'none';
+      document.getElementById('trackResult').innerHTML = '';
+      showToast('Order history cleared');
+    }
+
+    // On page load — check for URL param or saved orders
     const params = new URLSearchParams(window.location.search);
     const autoId = params.get('id');
     if (autoId) {
       document.getElementById('trackInput').value = autoId;
-      trackOrder();
+      trackSingle();
     } else {
-      // Auto-load last saved order from localStorage
-      const savedCode = localStorage.getItem('sheltorani_last_order');
-      if (savedCode) {
-        document.getElementById('trackInput').value = savedCode;
-        document.getElementById('clearOrderLink').style.display = 'block';
-        trackOrder();
+      const savedOrders = JSON.parse(localStorage.getItem('sheltorani_orders') || '[]');
+      if (savedOrders.length > 0) {
+        document.getElementById('myOrdersSection').style.display = 'block';
+        loadAllMyOrders(savedOrders);
       }
-    }
-
-    function clearSavedOrder() {
-      localStorage.removeItem('sheltorani_last_order');
-      document.getElementById('trackInput').value = '';
-      document.getElementById('trackResult').innerHTML = '';
     }
   </script>
 </body>

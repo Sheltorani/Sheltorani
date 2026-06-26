@@ -148,8 +148,10 @@
         // Continue even if fetch fails
       }
 
-      // Save order code so customer doesn't have to retype it on tracking page
-      localStorage.setItem('sheltorani_last_order', orderId);
+      // Save all orders as a list so customer can track all their orders
+      const existing = JSON.parse(localStorage.getItem('sheltorani_orders') || '[]');
+      if (!existing.includes(orderId)) existing.unshift(orderId);
+      localStorage.setItem('sheltorani_orders', JSON.stringify(existing));
 
       // WhatsApp notification to owner
       const msg = encodeURIComponent(
