@@ -34,6 +34,10 @@
       <button class="btn-gold" onclick="trackOrder()">Track</button>
     </div>
 
+    <p id="clearOrderLink" style="text-align:center;margin-top:0.5rem;font-size:0.8rem;display:none">
+      Not your order? <a href="#" onclick="clearSavedOrder();document.getElementById('clearOrderLink').style.display='none';return false;" style="color:var(--gold);text-decoration:none">Track a different order →</a>
+    </p>
+
     <div id="trackResult"></div>
   </div>
 
@@ -142,11 +146,26 @@
       }
     }
 
+    // Auto-load from URL param (when redirected from confirm page)
     const params = new URLSearchParams(window.location.search);
     const autoId = params.get('id');
     if (autoId) {
       document.getElementById('trackInput').value = autoId;
       trackOrder();
+    } else {
+      // Auto-load last saved order from localStorage
+      const savedCode = localStorage.getItem('sheltorani_last_order');
+      if (savedCode) {
+        document.getElementById('trackInput').value = savedCode;
+        document.getElementById('clearOrderLink').style.display = 'block';
+        trackOrder();
+      }
+    }
+
+    function clearSavedOrder() {
+      localStorage.removeItem('sheltorani_last_order');
+      document.getElementById('trackInput').value = '';
+      document.getElementById('trackResult').innerHTML = '';
     }
   </script>
 </body>

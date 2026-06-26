@@ -148,6 +148,9 @@
         // Continue even if fetch fails
       }
 
+      // Save order code so customer doesn't have to retype it on tracking page
+      localStorage.setItem('sheltorani_last_order', orderId);
+
       // WhatsApp notification to owner
       const msg = encodeURIComponent(
         `🌟 NEW SHELTORANI ORDER\n\nOrder ID: ${orderId}\nPerfume: ${perfume.name}\nSize: ${selectedSize.ml}ml\nAmount: KSh ${selectedSize.price}\n\nCustomer: ${name}\nPhone: ${phone}\n\nPayment: Cash on Delivery`
