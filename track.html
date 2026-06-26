@@ -8,8 +8,6 @@
   <link rel="icon" type="image/png" href="logo.png" />
 </head>
 <body>
-
-  <!-- NAV -->
   <nav>
     <a href="index.html" class="nav-logo">
       <img src="logo.png" alt="Sheltorani" onerror="this.style.display='none'" />
@@ -22,17 +20,11 @@
   </nav>
 
   <div class="tracking-page" style="padding-top:96px">
-
     <div class="section-eyebrow">Live Tracking</div>
-    <h1 style="font-size:clamp(1.8rem,6vw,2.8rem);color:var(--gold);font-family:var(--font-display);letter-spacing:0.06em">
-      Track Your Order
-    </h1>
+    <h1 style="font-size:clamp(1.8rem,6vw,2.8rem);color:var(--gold);font-family:var(--font-display);letter-spacing:0.06em">Track Your Order</h1>
     <div class="divider divider-left"></div>
-    <p style="font-family:var(--font-serif);color:var(--text-muted)">
-      Enter the order code from your confirmation page.
-    </p>
+    <p style="font-family:var(--font-serif);color:var(--text-muted)">Enter your order code to see live status.</p>
 
-    <!-- Search input -->
     <div class="tracking-input-group">
       <input class="form-input" type="text" id="trackInput"
         placeholder="e.g. SHT-4K2M"
@@ -42,199 +34,120 @@
       <button class="btn-gold" onclick="trackOrder()">Track</button>
     </div>
 
-    <!-- Result area -->
     <div id="trackResult"></div>
-
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
   <script src="data.js"></script>
   <script>
+    // ── REPLACE THIS WITH YOUR APPS SCRIPT URL ──
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzV3auRoUQJshElYq-uOJdxCVmU6SCUWT5KtRzgYCBJW2NZABGhCL3JyKwPD4mkxPs/exec';
 
-    // ── Status definitions ─────────────────
     const STATUSES = [
-      {
-        key:   'bottling',
-        icon:  '🧴',
-        label: 'Blending & Bottling',
-        desc:  'Your fragrance is being carefully measured and bottled.'
-      },
-      {
-        key:   'packaging',
-        icon:  '🎀',
-        label: 'Ribbon & Packaging',
-        desc:  'Your order is being wrapped and prepared for dispatch.'
-      },
-      {
-        key:   'delivery',
-        icon:  '🛵',
-        label: 'Out for Delivery',
-        desc:  "We're on the way to your location on campus."
-      },
-      {
-        key:   'delivered',
-        icon:  '✅',
-        label: 'Delivered',
-        desc:  'Order complete. Enjoy your fragrance!'
-      }
+      { key: 'bottling',  icon: '🧴', label: 'Blending & Bottling', desc: 'Your fragrance is being carefully measured and bottled.' },
+      { key: 'packaging', icon: '🎀', label: 'Ribbon & Packaging',  desc: 'Your order is being wrapped and prepared for dispatch.' },
+      { key: 'delivery',  icon: '🛵', label: 'Out for Delivery',    desc: "We're on the way to your location on campus." },
+      { key: 'delivered', icon: '✅', label: 'Delivered',           desc: 'Order complete. Enjoy your fragrance!' }
     ];
 
-    function showToast(msg, isError = false) {
+    function showToast(msg, isError=false) {
       const t = document.getElementById('toast');
       t.textContent = msg;
-      t.className = 'toast show' + (isError ? ' error' : '');
-      setTimeout(() => t.className = 'toast', 3500);
+      t.className = 'toast show' + (isError?' error':'');
+      setTimeout(() => t.className='toast', 3500);
     }
 
     function formatTime(iso) {
-      const d = new Date(iso);
-      return d.toLocaleString('en-KE', { hour:'2-digit', minute:'2-digit', month:'short', day:'numeric' });
+      return new Date(iso).toLocaleString('en-KE', { hour:'2-digit', minute:'2-digit', month:'short', day:'numeric' });
     }
 
-    function trackOrder() {
+    async function trackOrder() {
       const raw   = document.getElementById('trackInput').value.trim().toUpperCase();
       const input = raw.startsWith('SHT-') ? raw : `SHT-${raw}`;
       const result = document.getElementById('trackResult');
 
-      if (input.length < 8) {
-        showToast('Enter a valid order code like SHT-4K2M', true);
-        return;
-      }
+      if (input.length < 8) { showToast('Enter a valid order code like SHT-4K2M', true); return; }
 
-      // Load from localStorage
-      const stored = localStorage.getItem(`order_${input}`);
+      result.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:var(--font-serif);font-style:italic">Fetching your order...</div>`;
 
-      if (!stored) {
-        result.innerHTML = `
-          <div class="not-found fade-in">
-            <span class="not-found-icon">✦</span>
-            <h3>Order <strong style="color:var(--gold)">${input}</strong> not found</h3>
-            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem;font-family:var(--font-serif)">
-              Double-check your code — it starts with SHT- followed by 4 characters.
-            </p>
-          </div>
-        `;
-        return;
-      }
+      try {
+        const res  = await fetch(`${SCRIPT_URL}?orderID=${input}`);
+        const data = await res.json();
 
-      const order = JSON.parse(stored);
-      const currentIndex = STATUSES.findIndex(s => s.key === order.status);
+        if (!data.success) {
+          result.innerHTML = `
+            <div class="not-found fade-in">
+              <span class="not-found-icon">✦</span>
+              <h3>Order <strong style="color:var(--gold)">${input}</strong> not found</h3>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem;font-family:var(--font-serif)">Double-check your code — it starts with SHT- followed by 4 characters.</p>
+            </div>`;
+          return;
+        }
 
-      // Build timeline
-      let timelineHTML = '';
-      STATUSES.forEach((s, i) => {
-        let state = 'pending';
-        if (i < currentIndex)  state = 'done';
-        if (i === currentIndex) state = 'active';
+        const order = data.order;
+        const currentIndex = STATUSES.findIndex(s => s.key === order.status);
 
-        const timeStr = state === 'done' ? `<div class="timeline-time">Completed</div>` :
-                        state === 'active' ? `<div class="timeline-time" style="color:var(--gold)">In progress now</div>` :
-                        `<div class="timeline-time">Pending</div>`;
-
-        timelineHTML += `
-          <li class="timeline-item ${state}">
-            <div class="timeline-dot">${state === 'done' ? '✓' : s.icon}</div>
-            <div class="timeline-content">
-              <div class="timeline-title">${s.label}</div>
-              ${state === 'active' ? `<div class="timeline-time" style="color:var(--gold-dim);font-style:italic">${s.desc}</div>` : ''}
-              ${timeStr}
-            </div>
-          </li>
-        `;
-      });
-
-      // Status badge color
-      const statusColors = {
-        bottling:  '#c9a84c',
-        packaging: '#c9a84c',
-        delivery:  '#4caf7c',
-        delivered: '#4caf7c'
-      };
-      const statusColor = statusColors[order.status] || 'var(--gold)';
-
-      result.innerHTML = `
-        <div class="order-card fade-in">
-          <div class="order-card-header">
-            <div class="order-id">${order.id}</div>
-            <div class="order-meta">${order.perfume} · ${order.size}ml · KSh ${order.price}</div>
-            <div style="margin-top:0.75rem">
-              <span style="
-                font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;
-                color:${statusColor};
-                border:1px solid ${statusColor}44;
-                background:${statusColor}11;
-                padding:0.3rem 0.75rem;border-radius:20px;
-              ">${STATUSES[currentIndex]?.label || order.status}</span>
-            </div>
-          </div>
-          <div class="order-card-body">
-            <ul class="timeline">${timelineHTML}</ul>
-
-            <div style="
-              margin-top:1.5rem;
-              padding:1rem;
-              background:var(--marble-3);
-              border:1px solid var(--border-soft);
-              border-radius:var(--radius);
-              font-size:0.8rem;
-              color:var(--text-muted);
-            ">
-              <strong style="color:var(--gold);font-family:var(--font-body)">Customer:</strong>
-              ${order.name} · ${order.phone}<br/>
-              <strong style="color:var(--gold);font-family:var(--font-body)">Placed:</strong>
-              ${formatTime(order.placedAt)}
-            </div>
-
-            ${order.status === 'delivered' ? `
-              <div style="margin-top:1.5rem;text-align:center;padding:1rem">
-                <div style="font-size:2rem;margin-bottom:0.5rem">🌟</div>
-                <div style="font-family:var(--font-serif);font-style:italic;color:var(--cream);font-size:1rem">
-                  Enjoy your fragrance. Wear what they remember you by.
-                </div>
+        let timelineHTML = '';
+        STATUSES.forEach((s, i) => {
+          let state = i < currentIndex ? 'done' : i === currentIndex ? 'active' : 'pending';
+          timelineHTML += `
+            <li class="timeline-item ${state}">
+              <div class="timeline-dot">${state==='done'?'✓':s.icon}</div>
+              <div class="timeline-content">
+                <div class="timeline-title">${s.label}</div>
+                ${state==='active'?`<div class="timeline-time" style="color:var(--gold-dim);font-style:italic">${s.desc}</div>`:''}
+                <div class="timeline-time">${state==='done'?'Completed':state==='active'?'<span style="color:var(--gold)">In progress now</span>':'Pending'}</div>
               </div>
-            ` : `
-              <p style="margin-top:1.5rem;font-size:0.78rem;color:var(--text-muted);text-align:center">
+            </li>`;
+        });
+
+        const statusColors = { bottling:'#c9a84c', packaging:'#c9a84c', delivery:'#4caf7c', delivered:'#4caf7c' };
+        const statusColor  = statusColors[order.status] || 'var(--gold)';
+        const currentStatus = STATUSES[currentIndex];
+
+        result.innerHTML = `
+          <div class="order-card fade-in">
+            <div class="order-card-header">
+              <div class="order-id">${order.orderID}</div>
+              <div class="order-meta">${order.perfume} · ${order.size}ml · KSh ${order.price}</div>
+              <div style="margin-top:0.75rem">
+                <span style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:${statusColor};border:1px solid ${statusColor}44;background:${statusColor}11;padding:0.3rem 0.75rem;border-radius:20px">
+                  ${currentStatus?.icon} ${currentStatus?.label || order.status}
+                </span>
+              </div>
+            </div>
+            <div class="order-card-body">
+              <ul class="timeline">${timelineHTML}</ul>
+              <div style="margin-top:1.5rem;padding:1rem;background:var(--marble-3);border:1px solid var(--border-soft);border-radius:var(--radius);font-size:0.8rem;color:var(--text-muted)">
+                <strong style="color:var(--gold)">Customer:</strong> ${order.name} · ${order.phone}<br/>
+                <strong style="color:var(--gold)">Placed:</strong> ${formatTime(order.placedAt)}
+              </div>
+              ${order.status==='delivered'?`
+                <div style="margin-top:1.5rem;text-align:center;padding:1rem">
+                  <div style="font-size:2rem;margin-bottom:0.5rem">🌟</div>
+                  <div style="font-family:var(--font-serif);font-style:italic;color:var(--cream);font-size:1rem">Enjoy your fragrance. Wear what they remember you by.</div>
+                </div>`:`
+                <button onclick="trackOrder()" style="width:100%;margin-top:1rem;background:transparent;border:1px solid var(--border-soft);border-radius:var(--radius);padding:0.75rem;font-family:var(--font-body);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);cursor:pointer">
+                  🔄 Refresh Status
+                </button>`}
+              <p style="margin-top:1rem;font-size:0.78rem;color:var(--text-muted);text-align:center">
                 Questions? <a href="https://wa.me/${SHELTORANI_CONFIG.whatsapp}" style="color:var(--gold);text-decoration:none">WhatsApp us →</a>
               </p>
-            `}
-          </div>
-        </div>
-      `;
+            </div>
+          </div>`;
+
+      } catch(e) {
+        result.innerHTML = `<div class="not-found fade-in"><span class="not-found-icon">⚠️</span><h3 style="color:var(--text-muted)">Connection error. Please try again.</h3></div>`;
+      }
     }
 
-    // ── Admin: update order status ─────────
-    // To update an order status from your phone:
-    // Open browser console → type:
-    // updateStatus('SHT-XXXX', 'packaging')
-    // updateStatus('SHT-XXXX', 'delivery')
-    // updateStatus('SHT-XXXX', 'delivered')
-    function updateStatus(orderId, newStatus) {
-      const key = `order_${orderId}`;
-      const stored = localStorage.getItem(key);
-      if (!stored) { console.log('Order not found'); return; }
-      const order = JSON.parse(stored);
-      order.status = newStatus;
-      order.updatedAt = new Date().toISOString();
-      localStorage.setItem(key, JSON.stringify(order));
-      console.log(`✅ ${orderId} updated to: ${newStatus}`);
-      // Refresh display if currently viewing
-      const input = document.getElementById('trackInput');
-      if (input.value.includes(orderId.replace('SHT-',''))) trackOrder();
-    }
-
-    // Make it globally accessible
-    window.updateStatus = updateStatus;
-
-    // ── Auto-load from URL ─────────────────
     const params = new URLSearchParams(window.location.search);
     const autoId = params.get('id');
     if (autoId) {
       document.getElementById('trackInput').value = autoId;
       trackOrder();
     }
-
   </script>
 </body>
 </html>

@@ -7,210 +7,54 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/png" href="logo.png" />
   <style>
-    .admin-login {
-      min-height: 100svh;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 2rem;
-      text-align: center;
-    }
-    .admin-panel {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 5rem 1.5rem 3rem;
-    }
-    .order-row {
-      background: var(--marble-2);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      animation: fadeUp 0.4s ease both;
-    }
-    .order-row-top {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      margin-bottom: 0.75rem;
-    }
-    .order-row-id {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      color: var(--gold);
-    }
-    .order-row-status {
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 0.3rem 0.75rem;
-      border-radius: 20px;
-    }
-    .status-bottling  { color: #c9a84c; border: 1px solid #c9a84c44; background: #c9a84c11; }
-    .status-packaging { color: #c9a84c; border: 1px solid #c9a84c44; background: #c9a84c11; }
-    .status-delivery  { color: #4caf7c; border: 1px solid #4caf7c44; background: #4caf7c11; }
-    .status-delivered { color: #4caf7c; border: 1px solid #4caf7c44; background: #4caf7c11; }
-    .order-row-meta {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-bottom: 1rem;
-      font-family: var(--font-serif);
-    }
-    .status-selector {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.5rem;
-    }
-    .status-option {
-      background: var(--marble-3);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius);
-      padding: 0.6rem;
-      text-align: center;
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-    }
-    .status-option:hover { border-color: var(--border); color: var(--cream); }
-    .status-option.selected {
-      border-color: var(--gold);
-      background: var(--gold-glow);
-      color: var(--gold);
-    }
-    .status-icon { display: block; font-size: 1.2rem; margin-bottom: 0.3rem; }
-    .update-btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--gold-light), var(--gold));
-      color: var(--black);
-      border: none;
-      border-radius: var(--radius);
-      padding: 0.75rem;
-      font-family: var(--font-body);
-      font-size: 0.72rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      margin-top: 0.75rem;
-    }
-    .update-btn:hover { box-shadow: 0 4px 20px rgba(201,168,76,0.3); }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .stat-card {
-      background: var(--marble-2);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem;
-      text-align: center;
-    }
-    .stat-number {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      color: var(--gold);
-      line-height: 1;
-    }
-    .stat-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-top: 0.4rem;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 3rem 1.5rem;
-      color: var(--text-muted);
-      font-family: var(--font-serif);
-      font-style: italic;
-    }
-    .tab-bar {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 2rem;
-      background: var(--marble-2);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius);
-      padding: 0.3rem;
-    }
-    .tab-btn {
-      flex: 1;
-      background: transparent;
-      border: none;
-      border-radius: calc(var(--radius) - 2px);
-      padding: 0.6rem;
-      font-family: var(--font-body);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .tab-btn.active {
-      background: var(--gold-glow);
-      color: var(--gold);
-      border: 1px solid var(--border);
-    }
-    .section { display: none; }
-    .section.active { display: block; }
-    .pin-dots {
-      display: flex; gap: 0.75rem; justify-content: center;
-      margin: 1.5rem 0;
-    }
-    .pin-dot {
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--marble-3);
-      transition: var(--transition);
-    }
-    .pin-dot.filled { background: var(--gold); border-color: var(--gold); }
-    .pin-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
-      max-width: 240px;
-      margin: 0 auto;
-    }
-    .pin-key {
-      background: var(--marble-2);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius);
-      padding: 1rem;
-      font-family: var(--font-display);
-      font-size: 1.3rem;
-      color: var(--cream);
-      cursor: pointer;
-      text-align: center;
-      transition: var(--transition);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .pin-key:active { background: var(--gold-glow); border-color: var(--gold); }
-    .pin-key.del { font-size: 1rem; color: var(--text-muted); }
-    .pin-error { color: #e05555; font-size: 0.8rem; margin-top: 0.5rem; animation: fadeUp 0.3s ease; }
+    .admin-login { min-height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; text-align:center; }
+    .admin-panel { max-width:500px; margin:0 auto; padding:5rem 1.5rem 3rem; }
+    .order-row { background:var(--marble-2); border:1px solid var(--border-soft); border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1rem; animation:fadeUp 0.4s ease both; }
+    .order-row-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem; }
+    .order-row-id { font-family:var(--font-display); font-size:1.1rem; color:var(--gold); }
+    .order-row-status { font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.3rem 0.75rem; border-radius:20px; }
+    .status-bottling,.status-packaging { color:#c9a84c; border:1px solid #c9a84c44; background:#c9a84c11; }
+    .status-delivery,.status-delivered { color:#4caf7c; border:1px solid #4caf7c44; background:#4caf7c11; }
+    .order-row-meta { font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem; font-family:var(--font-serif); }
+    .status-selector { display:grid; grid-template-columns:repeat(2,1fr); gap:0.5rem; }
+    .status-option { background:var(--marble-3); border:1px solid var(--border-soft); border-radius:var(--radius); padding:0.6rem; text-align:center; cursor:pointer; transition:var(--transition); font-size:0.7rem; color:var(--text-muted); }
+    .status-option:hover { border-color:var(--border); color:var(--cream); }
+    .status-option.selected { border-color:var(--gold); background:var(--gold-glow); color:var(--gold); }
+    .status-icon { display:block; font-size:1.2rem; margin-bottom:0.3rem; }
+    .stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; margin-bottom:2rem; }
+    .stat-card { background:var(--marble-2); border:1px solid var(--border-soft); border-radius:var(--radius-lg); padding:1.25rem; text-align:center; }
+    .stat-number { font-family:var(--font-display); font-size:2rem; color:var(--gold); line-height:1; }
+    .stat-label { font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-muted); margin-top:0.4rem; }
+    .empty-state { text-align:center; padding:3rem 1.5rem; color:var(--text-muted); font-family:var(--font-serif); font-style:italic; }
+    .tab-bar { display:flex; gap:0.5rem; margin-bottom:2rem; background:var(--marble-2); border:1px solid var(--border-soft); border-radius:var(--radius); padding:0.3rem; }
+    .tab-btn { flex:1; background:transparent; border:none; border-radius:calc(var(--radius) - 2px); padding:0.6rem; font-family:var(--font-body); font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); cursor:pointer; transition:var(--transition); }
+    .tab-btn.active { background:var(--gold-glow); color:var(--gold); border:1px solid var(--border); }
+    .section { display:none; }
+    .section.active { display:block; }
+    .pin-dots { display:flex; gap:0.75rem; justify-content:center; margin:1.5rem 0; }
+    .pin-dot { width:14px; height:14px; border-radius:50%; border:1px solid var(--border); background:var(--marble-3); transition:var(--transition); }
+    .pin-dot.filled { background:var(--gold); border-color:var(--gold); }
+    .pin-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; max-width:240px; margin:0 auto; }
+    .pin-key { background:var(--marble-2); border:1px solid var(--border-soft); border-radius:var(--radius); padding:1rem; font-family:var(--font-display); font-size:1.3rem; color:var(--cream); cursor:pointer; text-align:center; transition:var(--transition); -webkit-tap-highlight-color:transparent; }
+    .pin-key:active { background:var(--gold-glow); border-color:var(--gold); }
+    .pin-error { color:#e05555; font-size:0.8rem; margin-top:0.5rem; }
+    .loading { text-align:center; padding:2rem; color:var(--text-muted); font-family:var(--font-serif); font-style:italic; }
   </style>
 </head>
 <body>
 
-  <!-- LOGIN SCREEN -->
+  <!-- LOGIN -->
   <div class="admin-login" id="loginScreen">
     <img src="logo.png" alt="Sheltorani" style="width:70px;margin-bottom:1.5rem;opacity:0.8" onerror="this.style.display='none'" />
     <h1 style="font-size:1.4rem;color:var(--gold);font-family:var(--font-display);letter-spacing:0.1em">Admin Access</h1>
     <p style="font-family:var(--font-serif);color:var(--text-muted);font-size:0.9rem;margin-top:0.5rem">Enter your PIN</p>
-
     <div class="pin-dots" id="pinDots">
       <div class="pin-dot" id="d0"></div>
       <div class="pin-dot" id="d1"></div>
       <div class="pin-dot" id="d2"></div>
       <div class="pin-dot" id="d3"></div>
     </div>
-
     <div id="pinError"></div>
-
     <div class="pin-grid" style="margin-top:1.5rem">
       <button class="pin-key" onclick="pinPress('1')">1</button>
       <button class="pin-key" onclick="pinPress('2')">2</button>
@@ -222,12 +66,8 @@
       <button class="pin-key" onclick="pinPress('8')">8</button>
       <button class="pin-key" onclick="pinPress('9')">9</button>
       <button class="pin-key" onclick="pinPress('0')" style="grid-column:2">0</button>
-      <button class="pin-key del" onclick="pinDelete()">⌫</button>
+      <button class="pin-key" onclick="pinDelete()" style="font-size:1rem;color:var(--text-muted)">⌫</button>
     </div>
-
-    <p style="margin-top:2.5rem;font-size:0.65rem;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase">
-      Sheltorani Private Perfumery
-    </p>
   </div>
 
   <!-- ADMIN PANEL -->
@@ -242,36 +82,20 @@
       </a>
       <button class="nav-track-btn" onclick="logout()">Lock</button>
     </nav>
-
     <div class="admin-panel">
-
-      <!-- STATS -->
       <div class="stats-grid" id="statsGrid"></div>
-
-      <!-- TABS -->
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('active')">Active Orders</button>
+        <button class="tab-btn active" onclick="switchTab('active')">Active</button>
         <button class="tab-btn" onclick="switchTab('delivered')">Delivered</button>
         <button class="tab-btn" onclick="switchTab('search')">Search</button>
       </div>
-
-      <!-- ACTIVE ORDERS -->
-      <div class="section active" id="tab-active">
-        <div id="activeOrders"></div>
-      </div>
-
-      <!-- DELIVERED -->
-      <div class="section" id="tab-delivered">
-        <div id="deliveredOrders"></div>
-      </div>
-
-      <!-- SEARCH -->
+      <div class="section active" id="tab-active"><div id="activeOrders"></div></div>
+      <div class="section" id="tab-delivered"><div id="deliveredOrders"></div></div>
       <div class="section" id="tab-search">
         <div style="margin-bottom:1.5rem">
           <label class="form-label">Order Code</label>
           <div style="display:flex;gap:0.75rem">
-            <input class="form-input" type="text" id="searchInput"
-              placeholder="SHT-4K2M"
+            <input class="form-input" type="text" id="searchInput" placeholder="SHT-4K2M"
               style="text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-display)"
               oninput="this.value=this.value.toUpperCase()"
               onkeydown="if(event.key==='Enter')searchOrder()" />
@@ -280,18 +104,17 @@
         </div>
         <div id="searchResult"></div>
       </div>
-
     </div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
   <script src="data.js"></script>
   <script>
+    // ── REPLACE THIS WITH YOUR APPS SCRIPT URL ──
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzV3auRoUQJshElYq-uOJdxCVmU6SCUWT5KtRzgYCBJW2NZABGhCL3JyKwPD4mkxPs/exec';
 
-    // ── PIN ─────────────────────────────────
-    // CHANGE THIS TO YOUR OWN 4-DIGIT PIN
+    // ── CHANGE THIS TO YOUR OWN PIN ──
     const ADMIN_PIN = '1234';
     let pinEntry = '';
 
@@ -299,23 +122,16 @@
       if (pinEntry.length >= 4) return;
       pinEntry += digit;
       updatePinDots();
-      if (pinEntry.length === 4) {
-        setTimeout(checkPin, 200);
-      }
+      if (pinEntry.length === 4) setTimeout(checkPin, 200);
     }
-
     function pinDelete() {
-      pinEntry = pinEntry.slice(0, -1);
+      pinEntry = pinEntry.slice(0,-1);
       updatePinDots();
       document.getElementById('pinError').innerHTML = '';
     }
-
     function updatePinDots() {
-      for (let i = 0; i < 4; i++) {
-        document.getElementById(`d${i}`).classList.toggle('filled', i < pinEntry.length);
-      }
+      for (let i=0;i<4;i++) document.getElementById(`d${i}`).classList.toggle('filled', i < pinEntry.length);
     }
-
     function checkPin() {
       if (pinEntry === ADMIN_PIN) {
         document.getElementById('loginScreen').style.display = 'none';
@@ -323,187 +139,122 @@
         loadPanel();
       } else {
         document.getElementById('pinError').innerHTML = '<div class="pin-error">Incorrect PIN</div>';
-        pinEntry = '';
-        updatePinDots();
+        pinEntry = ''; updatePinDots();
       }
     }
-
     function logout() {
-      pinEntry = '';
-      updatePinDots();
+      pinEntry = ''; updatePinDots();
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('adminPanel').style.display = 'none';
     }
 
-    // ── LOAD ALL ORDERS ──────────────────────
-    function getAllOrders() {
-      const orders = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith('order_SHT-')) {
-          try {
-            orders.push(JSON.parse(localStorage.getItem(key)));
-          } catch(e) {}
-        }
-      }
-      return orders.sort((a,b) => new Date(b.placedAt) - new Date(a.placedAt));
-    }
-
-    // ── STATS ────────────────────────────────
-    function loadStats(orders) {
-      const active    = orders.filter(o => o.status !== 'delivered').length;
-      const delivered = orders.filter(o => o.status === 'delivered').length;
-      const revenue   = orders.filter(o => o.status === 'delivered').reduce((s,o) => s + o.price, 0);
-      const total     = orders.length;
-
-      document.getElementById('statsGrid').innerHTML = `
-        <div class="stat-card">
-          <div class="stat-number">${active}</div>
-          <div class="stat-label">Active</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${delivered}</div>
-          <div class="stat-label">Delivered</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${total}</div>
-          <div class="stat-label">Total Orders</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" style="font-size:1.3rem">KSh ${revenue.toLocaleString()}</div>
-          <div class="stat-label">Revenue</div>
-        </div>
-      `;
-    }
-
-    // ── RENDER ORDER CARD ────────────────────
     const STATUS_LABELS = {
-      bottling:  { label: 'Blending & Bottling', icon: '🧴' },
-      packaging: { label: 'Packaging',           icon: '🎀' },
-      delivery:  { label: 'Out for Delivery',    icon: '🛵' },
-      delivered: { label: 'Delivered',           icon: '✅' }
+      bottling:  { label:'Blending & Bottling', icon:'🧴' },
+      packaging: { label:'Packaging',           icon:'🎀' },
+      delivery:  { label:'Out for Delivery',    icon:'🛵' },
+      delivered: { label:'Delivered',           icon:'✅' }
     };
 
     function formatTime(iso) {
-      return new Date(iso).toLocaleString('en-KE', {
-        hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric'
-      });
+      return new Date(iso).toLocaleString('en-KE', { hour:'2-digit', minute:'2-digit', month:'short', day:'numeric' });
     }
 
     function renderOrderCard(order) {
-      const s = STATUS_LABELS[order.status] || { label: order.status, icon: '📦' };
+      const s = STATUS_LABELS[order.status] || { label:order.status, icon:'📦' };
       return `
-        <div class="order-row" id="card-${order.id}">
+        <div class="order-row" id="card-${order.orderID}">
           <div class="order-row-top">
             <div>
-              <div class="order-row-id">${order.id}</div>
+              <div class="order-row-id">${order.orderID}</div>
               <div class="order-row-meta">${order.perfume} · ${order.size}ml · KSh ${order.price}</div>
-              <div class="order-row-meta" style="margin-bottom:0">${order.name} · ${order.phone}</div>
+              <div class="order-row-meta">${order.name} · ${order.phone}</div>
             </div>
             <span class="order-row-status status-${order.status}">${s.icon} ${s.label}</span>
           </div>
-
           <div class="status-selector">
-            <div class="status-option ${order.status==='bottling'?'selected':''}"
-              onclick="setStatus('${order.id}','bottling',this)">
+            <div class="status-option ${order.status==='bottling'?'selected':''}" onclick="setStatus('${order.orderID}','bottling',this)">
               <span class="status-icon">🧴</span>Bottling
             </div>
-            <div class="status-option ${order.status==='packaging'?'selected':''}"
-              onclick="setStatus('${order.id}','packaging',this)">
+            <div class="status-option ${order.status==='packaging'?'selected':''}" onclick="setStatus('${order.orderID}','packaging',this)">
               <span class="status-icon">🎀</span>Packaging
             </div>
-            <div class="status-option ${order.status==='delivery'?'selected':''}"
-              onclick="setStatus('${order.id}','delivery',this)">
+            <div class="status-option ${order.status==='delivery'?'selected':''}" onclick="setStatus('${order.orderID}','delivery',this)">
               <span class="status-icon">🛵</span>Delivery
             </div>
-            <div class="status-option ${order.status==='delivered'?'selected':''}"
-              onclick="setStatus('${order.id}','delivered',this)">
+            <div class="status-option ${order.status==='delivered'?'selected':''}" onclick="setStatus('${order.orderID}','delivered',this)">
               <span class="status-icon">✅</span>Delivered
             </div>
           </div>
-
-          <div style="margin-top:0.75rem;font-size:0.7rem;color:var(--text-muted)">
-            Placed: ${formatTime(order.placedAt)}
-          </div>
-        </div>
-      `;
+          <div style="margin-top:0.75rem;font-size:0.7rem;color:var(--text-muted)">Placed: ${formatTime(order.placedAt)}</div>
+        </div>`;
     }
 
-    // ── LOAD PANEL ───────────────────────────
-    function loadPanel() {
-      const orders    = getAllOrders();
-      const active    = orders.filter(o => o.status !== 'delivered');
-      const delivered = orders.filter(o => o.status === 'delivered');
-
-      loadStats(orders);
-
-      document.getElementById('activeOrders').innerHTML =
-        active.length ? active.map(renderOrderCard).join('') :
-        '<div class="empty-state">No active orders right now.</div>';
-
-      document.getElementById('deliveredOrders').innerHTML =
-        delivered.length ? delivered.map(renderOrderCard).join('') :
-        '<div class="empty-state">No delivered orders yet.</div>';
+    async function loadPanel() {
+      document.getElementById('activeOrders').innerHTML = '<div class="loading">Loading orders...</div>';
+      try {
+        const res  = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        if (!data.success) throw new Error('Failed');
+        const orders    = data.orders;
+        const active    = orders.filter(o => o.status !== 'delivered');
+        const delivered = orders.filter(o => o.status === 'delivered');
+        const revenue   = delivered.reduce((s,o) => s + Number(o.price), 0);
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="stat-card"><div class="stat-number">${active.length}</div><div class="stat-label">Active</div></div>
+          <div class="stat-card"><div class="stat-number">${delivered.length}</div><div class="stat-label">Delivered</div></div>
+          <div class="stat-card"><div class="stat-number">${orders.length}</div><div class="stat-label">Total</div></div>
+          <div class="stat-card"><div class="stat-number" style="font-size:1.2rem">KSh ${revenue.toLocaleString()}</div><div class="stat-label">Revenue</div></div>`;
+        document.getElementById('activeOrders').innerHTML = active.length ? active.map(renderOrderCard).join('') : '<div class="empty-state">No active orders right now.</div>';
+        document.getElementById('deliveredOrders').innerHTML = delivered.length ? delivered.map(renderOrderCard).join('') : '<div class="empty-state">No delivered orders yet.</div>';
+      } catch(e) {
+        document.getElementById('activeOrders').innerHTML = '<div class="empty-state">Could not load orders. Check your connection.</div>';
+      }
     }
 
-    // ── UPDATE STATUS ────────────────────────
-    function setStatus(orderId, newStatus, clickedEl) {
-      const key = `order_${orderId}`;
-      const stored = localStorage.getItem(key);
-      if (!stored) return;
-
-      const order = JSON.parse(stored);
-      order.status = newStatus;
-      order.updatedAt = new Date().toISOString();
-      localStorage.setItem(key, JSON.stringify(order));
-
-      // Update buttons in this card
-      const card = document.getElementById(`card-${orderId}`);
-      card.querySelectorAll('.status-option').forEach(b => b.classList.remove('selected'));
-      clickedEl.classList.add('selected');
-
-      // Update status badge
-      const s = STATUS_LABELS[newStatus];
-      card.querySelector('.order-row-status').className = `order-row-status status-${newStatus}`;
-      card.querySelector('.order-row-status').textContent = `${s.icon} ${s.label}`;
-
-      showToast(`${orderId} → ${s.label}`);
-
-      // Refresh stats
-      loadStats(getAllOrders());
+    async function setStatus(orderId, newStatus, clickedEl) {
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action:'updateStatus', orderID:orderId, status:newStatus })
+        });
+        const card = document.getElementById(`card-${orderId}`);
+        card.querySelectorAll('.status-option').forEach(b => b.classList.remove('selected'));
+        clickedEl.classList.add('selected');
+        const s = STATUS_LABELS[newStatus];
+        card.querySelector('.order-row-status').className = `order-row-status status-${newStatus}`;
+        card.querySelector('.order-row-status').textContent = `${s.icon} ${s.label}`;
+        showToast(`✅ ${orderId} → ${s.label}`);
+      } catch(e) {
+        showToast('Update failed. Try again.', true);
+      }
     }
 
-    // ── SEARCH ───────────────────────────────
-    function searchOrder() {
+    async function searchOrder() {
       const raw = document.getElementById('searchInput').value.trim().toUpperCase();
       const id  = raw.startsWith('SHT-') ? raw : `SHT-${raw}`;
-      const stored = localStorage.getItem(`order_${id}`);
       const result = document.getElementById('searchResult');
-
-      if (!stored) {
-        result.innerHTML = `<div class="empty-state">Order ${id} not found.</div>`;
-        return;
+      result.innerHTML = '<div class="loading">Searching...</div>';
+      try {
+        const res  = await fetch(`${SCRIPT_URL}?orderID=${id}`);
+        const data = await res.json();
+        result.innerHTML = data.success ? renderOrderCard(data.order) : '<div class="empty-state">Order not found.</div>';
+      } catch(e) {
+        result.innerHTML = '<div class="empty-state">Connection error.</div>';
       }
-      result.innerHTML = renderOrderCard(JSON.parse(stored));
     }
 
-    // ── TAB SWITCH ───────────────────────────
     function switchTab(name) {
-      document.querySelectorAll('.tab-btn').forEach((b,i) => {
-        b.classList.toggle('active', ['active','delivered','search'][i] === name);
-      });
+      document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['active','delivered','search'][i]===name));
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById(`tab-${name}`).classList.add('active');
     }
 
-    // ── TOAST ────────────────────────────────
-    function showToast(msg) {
+    function showToast(msg, isError=false) {
       const t = document.getElementById('toast');
       t.textContent = msg;
-      t.className = 'toast show';
-      setTimeout(() => t.className = 'toast', 3000);
+      t.className = 'toast show' + (isError?' error':'');
+      setTimeout(() => t.className='toast', 3000);
     }
-
   </script>
 </body>
 </html>
